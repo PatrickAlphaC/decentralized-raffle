@@ -1,0 +1,6 @@
+{
+  "solidity.formatter": "prettier",
+  "[solidity]": {
+    "editor.defaultFormatter": "JuanBlanco.solidity"
+  }
+}
