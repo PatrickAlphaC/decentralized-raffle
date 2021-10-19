@@ -9,3 +9,5 @@ deployments
 cache
 artifacts
 .stephen
+.env
+typechain

@@ -3,17 +3,11 @@
 pragma solidity 0.8.7;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@chainlink/contracts/src/v0.8/VRFConsumerBase.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/KeeperCompatibleInterface.sol";
 import "hardhat/console.sol";
 
-contract Raffle is
-    Ownable,
-    VRFConsumerBase,
-    ReentrancyGuard,
-    KeeperCompatibleInterface
-{
+contract Raffle is Ownable, VRFConsumerBase, KeeperCompatibleInterface {
     bytes32 public s_keyHash;
     uint256 public s_chainlinkFee;
     uint256 public s_entranceFee;
@@ -21,6 +15,11 @@ contract Raffle is
     uint256 public s_interval;
     address public s_recentWinner;
     address payable[] public s_players;
+    raffleState public s_raffleState;
+    enum raffleState {
+        OPEN,
+        CALCULATING
+    }
 
     event requestedRaffleWinner(bytes32 indexed requestId);
     event enteredRaffle(address indexed player);
@@ -39,6 +38,7 @@ contract Raffle is
         s_chainlinkFee = _chainlinkFee;
         s_entranceFee = _entranceFee;
         s_interval = _interval;
+        s_raffleState = raffleState.OPEN;
     }
 
     function enterRaffle() public payable {
@@ -46,6 +46,7 @@ contract Raffle is
             msg.value >= s_entranceFee,
             "Not enough value sent to enter raffle"
         );
+        require(s_raffleState == raffleState.OPEN, "Raffle is not open");
         s_players.push(payable(msg.sender));
         emit enteredRaffle(msg.sender);
     }
@@ -72,7 +73,9 @@ contract Raffle is
         )
     {
         bool hasLink = LINK.balanceOf(address(this)) >= s_chainlinkFee;
+        bool isOpen = raffleState.OPEN == s_raffleState;
         upkeepNeeded = (((block.timestamp - s_lastTimeStamp) > s_interval) &&
+            isOpen &&
             hasLink &&
             (address(this).balance >= 0));
     }
@@ -92,6 +95,7 @@ contract Raffle is
         (bool upkeepNeeded, ) = checkUpkeep("");
         require(upkeepNeeded, "Upkeep not needed");
         s_lastTimeStamp = block.timestamp;
+        s_raffleState = raffleState.CALCULATING;
         bytes32 requestId = requestRandomness(s_keyHash, s_chainlinkFee);
         emit requestedRaffleWinner(requestId);
     }
@@ -99,14 +103,17 @@ contract Raffle is
     /**
      * @dev This is the function that Chainlink VRF node calls to send the money to the random winner
      */
-    function fulfillRandomness(bytes32 requestId, uint256 randomness)
-        internal
-        override
-    {
+    function fulfillRandomness(
+        bytes32, /* requestId */
+        uint256 randomness
+    ) internal override {
         uint256 index = randomness % s_players.length;
         address payable recentWinner = s_players[index];
-        (bool success, ) = recentWinner.call{value: address(this).balance}("");
         s_recentWinner = recentWinner;
+        s_players = new address payable[](0);
+        (bool success, ) = recentWinner.call{value: address(this).balance}("");
+        require(success, "Transfer failed");
+        s_raffleState = raffleState.OPEN;
         emit winnerPicked(recentWinner);
     }
 }

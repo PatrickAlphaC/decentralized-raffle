@@ -1,4 +1,7 @@
 {
+  "scripts": {
+    "test": "npx hardhat test"
+  },
   "name": "hardhat-project",
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.2",
@@ -37,6 +40,11 @@
     "@appliedblockchain/chainlink-plugins-fund-link": "^0.0.1",
     "@chainlink/contracts": "^0.2.2",
     "@openzeppelin/contracts": "^4.3.2",
-    "hardhat-deploy": "^0.9.4"
+    "global": "^4.4.0",
+    "hardhat-deploy": "^0.9.4",
+    "mocha-skip-if": "^0.0.3"
+  },
+  "compilerOptions": {
+    "esModuleInterop": true
   }
 }

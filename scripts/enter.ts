@@ -1,37 +1,26 @@
-// We require the Hardhat Runtime Environment explicitly here. This is optional
-// but useful for running the script in a standalone fashion through `node <script>`.
-//
-// When running the script with `npx hardhat run <script>` you'll find the Hardhat
+/* eslint-disable no-process-exit */
+import { /* run, */ ethers, deployments } from 'hardhat'
 
-const { ethers } = require("hardhat")
-// Runtime Environment's members available in the global scope.
-const hre = require("hardhat")
+export async function enterRaffle () {
+  // await run('compile') only needed when deploying in a script
+  const { get } = deployments
 
-async function main() {
-    // Hardhat always runs the compile task when running scripts with its command
-    // line interface.
-    //
-    // If this script is run directly using `node` you may want to call compile
-    // manually to make sure everything is compiled
-    // await hre.run('compile');
+  const accounts = await ethers.getSigners()
 
-    // We get the contract to deploy
-    const accounts = await hre.ethers.getSigners()
-    const Raffle = await hre.ethers.getContractFactory("Raffle")
-    // eslint-disable-next-line no-undef
-    const raffle = new ethers.Contract(Raffle, Raffle.interface, accounts[0])
-    const entranceFee = await raffle.s_entranceFee()
-    await raffle.enter({ value: entranceFee })
-    console.log("Entered!")
+  const Raffle = await ethers.getContractFactory('Raffle')
+  const RaffleDeployment = await get('Raffle')
+  // // eslint-disable-next-line no-undef
+  const raffle = new ethers.Contract(RaffleDeployment.address, Raffle.interface, accounts[0])
+  const entranceFee = await raffle.s_entranceFee()
+  const enterTx = await raffle.enterRaffle({ value: entranceFee.toString() })
+  await enterTx.wait()
+  console.log('Entered!')
+  return enterTx
 }
 
-// We recommend this pattern to be able to use async/await everywhere
-// and properly handle errors.
-main()
-    // eslint-disable-next-line no-process-exit
-    .then(() => process.exit(0))
-    .catch((error) => {
-        console.error(error)
-        // eslint-disable-next-line no-process-exit
-        process.exit(1)
-    })
+enterRaffle()
+  .then(() => process.exit(0))
+  .catch((error) => {
+    console.error(error)
+    process.exit(1)
+  })

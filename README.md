@@ -1,45 +1,77 @@
 # Decentralized Raffle
 
-Work in progress...
+# Quickstart
+ ## Requirements
 
+- [nodejs](https://nodejs.org/en/)
+- [NPM](https://www.npmjs.com/) or [YARN](https://yarnpkg.com/)
 
-# Tasks
+## Installation
 
-```shell
-npx hardhat accounts
-npx hardhat compile
-npx hardhat clean
-npx hardhat test
+```sh
+git clone 
+cd decentralized-raffle
+yarn
+```
+### Deploy contracts
+
+```sh
+npx hardhat deploy
+```
+
+### Deploy and start a local node
+
+```sh
 npx hardhat node
-npx hardhat help
-REPORT_GAS=true npx hardhat test
-npx hardhat coverage
-npx hardhat run scripts/deploy.ts
-TS_NODE_FILES=true npx ts-node scripts/deploy.ts
-npx eslint '**/*.{js,ts}'
-npx eslint '**/*.{js,ts}' --fix
-npx prettier '**/*.{json,sol,md}' --check
-npx prettier '**/*.{json,sol,md}' --write
-npx solhint 'contracts/**/*.sol'
-npx solhint 'contracts/**/*.sol' --fix
 ```
 
-# Etherscan verification
+### Deploy to Kovan
 
-To try out Etherscan verification, you first need to deploy a contract to an Ethereum network that's supported by Etherscan, such as Ropsten.
+To deploy to a testnet or a live network, you need the following environment variables:
 
-In this project, copy the .env.example file to a file named .env, and then edit it to fill in the details. Enter your Etherscan API key, your Ropsten node URL (eg from Alchemy), and the private key of the account which will send the deployment transaction. With a valid .env file in place, first deploy your contract:
+1. KOVAN_RPC_URL=https://eth-ropsten.alchemyapi.io/v2/<YOUR ALCHEMY KEY>
+2. PRIVATE_KEY=0xabc123abc123abc123abc123abc123abc123abc123abc123abc123abc123abc1
 
-```shell
-hardhat run --network ropsten scripts/sample-script.ts
+Your `KOVAN_RPC_URL` is the URL of your blockchain node, for example, from [alchemy](https://www.alchemy.com/).
+
+Your `PRIVATE_KEY` is the private key of your metamask or cryptowallet. Make sure it starts with `0x`. You might have to add `0x` if you're pulling the key from something like metamask. 
+
+You can set them in a file named `.env`. You can follow the example of `.env.example` of what the contents of that file will look like. 
+
+You'll also need testnet ETH and testnet LINK. You can [find both here.](https://faucets.chain.link/)
+
+Once you do so, you can run:
+
+```
+npx hardhat deploy --network kovan
+```
+Fund your contract with LINK.
+```
+npx hardhat fund-link --contract insert-contract-address-here --network kovan
+```
+And enter your raffle
+``` 
+npx hardhat run scripts/enter.ts --network kovan
 ```
 
-Then, copy the deployment address and paste it in to replace `DEPLOYED_CONTRACT_ADDRESS` in this command:
 
-```shell
-npx hardhat verify --network ropsten DEPLOYED_CONTRACT_ADDRESS "Hello, Hardhat!"
+### Add keepers
+
+Once you deploy to Kovan, you can register your contract with the kovan keepers registry. Please [follow the documentation](https://docs.chain.link/docs/chainlink-keepers/compatible-contracts/) for more information. 
+
+```sh
+npx hardhat deploy --network kovan
 ```
 
-# Performance optimizations
+And you can verify once you have an [`ETHERSCAN_API_KEY`](https://etherscan.io/apis)
 
-For faster runs of your tests and scripts, consider skipping ts-node's type checking by setting the environment variable `TS_NODE_TRANSPILE_ONLY` to `1` in hardhat's environment. For more details see [the documentation](https://hardhat.org/guides/typescript.html#performance-optimizations).
+```sh
+npx hardhat verify --network mainnet DEPLOYED_CONTRACT_ADDRESS args...
+```
+
+## Tests
+
+```sh
+npx hardhat test
+```
+
