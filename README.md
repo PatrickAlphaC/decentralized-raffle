@@ -9,7 +9,7 @@
 ## Installation
 
 ```sh
-git clone 
+git clone https://github.com/PatrickAlphaC/decentralized-raffle
 cd decentralized-raffle
 yarn
 ```
