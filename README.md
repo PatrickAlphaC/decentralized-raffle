@@ -9,7 +9,7 @@
 ## Installation
 
 ```sh
-git clone 
+git clone https://github.com/PatrickAlphaC/decentralized-raffle.git
 cd decentralized-raffle
 yarn
 ```
@@ -65,8 +65,50 @@ npx hardhat deploy --network kovan
 
 And you can verify once you have an [`ETHERSCAN_API_KEY`](https://etherscan.io/apis)
 
+Add this configuration in the file named `.env`:
+
+```javascript
+ETHERSCAN_API_KEY=<YOUR ETHERSCAN KEY>
+```
+
+The command to verify the source code in Etherscan is:
+
 ```sh
 npx hardhat verify --network mainnet DEPLOYED_CONTRACT_ADDRESS args...
+```
+
+The contract `Raffle` receives these arguments in his constructor:
+
+```solidity
+        address _vrfCoordinator,
+        address _linkToken,
+        bytes32 _keyHash,
+        uint256 _chainlinkFee,
+        uint256 _entranceFee,
+        uint256 _interval
+```
+
+Get the deploy's arguments in the file [helper-hardhat-config.ts](./helper-hardhat-config.ts).
+Find the network kovan (42). Per example:
+
+```javascript
+  42: {
+    name: 'kovan',
+    linkToken: '0xa36085F69e2889c224210F603D836748e7dC0088',
+    keyHash:
+      '0x6c3699283bda56ad74f6b855546325b68d482e983852a7a82979cc4807b641f4',
+    vrfCoordinator: '0xdD3782915140c8f3b190B5D67eAc6dc5760C46E9',
+    chainlinkFee: '100000000000000000',
+    entranceFee: '100000000000000000',
+    fundAmount: '1000000000000000000',
+    interval: '20'
+  }
+```
+
+Then run this command to verify the source code in Etherscan:
+
+```sh
+npx hardhat verify --network kovan <DEPLOYED_CONTRACT_ADDRESS> <vrfCoordinator> <linkToken> <keyHash> <chainlinkFee> <entranceFee> <interval>
 ```
 
 ## Tests
